@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laravel CRUD - Books</title>
-
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -12,10 +11,9 @@
         <h1>All Books</h1>
 
         <!-- Button to trigger modal -->
-        <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#createBookModal">
+        <button type="button" class="btn btn-success -mb3" data-toggle="modal" data-target="#createBookModal">
             Create New Book
         </button>
-
         <table class="table table-bordered">
             <thead class="thead-dark">
                 <tr>
@@ -34,19 +32,18 @@
                     <td>
                         <!-- Button to trigger Edit Modal with dynamic data -->
                         <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editBookModal"
-                            data-id="{{ $book->id }}" 
-                            data-title="{{ $book->title }}" 
-                            data-author="{{ $book->author }}" 
+                            data-id="{{ $book->id }}"
+                            data-title="{{ $book->title }}"
+                            data-author="{{ $book->author }}"
                             data-year="{{ $book->year }}">
                             Edit
                         </button>
 
-                        <!-- Delete Button -->
-                        <form action="/destroy/{{ $book->id }}" method="POST" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                        </form>
+                        <!-- Button to trigger Delete Confirmation Modal -->
+                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteBookModal"
+                            data-title="{{ $book->title }}" data-id="{{ $book->id }}">
+                            Delete
+                        </button>
                     </td>
                 </tr>
                 @endforeach
@@ -79,7 +76,7 @@
                             <label for="year">Year:</label>
                             <input type="text" name="year" id="year" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Create</button>
+                        <button type="submit" class="btn btn-success">Create</button>
                     </form>
                 </div>
             </div>
@@ -119,15 +116,38 @@
         </div>
     </div>
 
+    <!-- Modal for Deleting a Book -->
+    <div class="modal fade" id="deleteBookModal" tabindex="-1" role="dialog" aria-labelledby="deleteBookModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteBookModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteMessage"></p>
+                    <form id="deleteForm" method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Bootstrap JS and Popper.js -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // JavaScript to dynamically fill the modal with book data
+        // JavaScript to dynamically fill the modal with book data for editing
         $('#editBookModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget); // Button that triggered the modal
+            var button = $(event.relatedTarget);
             var bookId = button.data('id');
             var title = button.data('title');
             var author = button.data('author');
@@ -138,6 +158,17 @@
             modal.find('#edit-author').val(author);
             modal.find('#edit-year').val(year);
             modal.find('form').attr('action', '/update/' + bookId); // Set form action URL dynamically
+        });
+
+        // JavaScript to dynamically fill the modal with book data for deletion
+        $('#deleteBookModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var bookId = button.data('id');
+            var title = button.data('title');
+            
+            var modal = $(this);
+            modal.find('#deleteMessage').text('Are you sure you want to delete the book "' + title + '"?');
+            modal.find('#deleteForm').attr('action', '/destroy/' + bookId); // Set form action URL dynamically
         });
     </script>
 </body>
